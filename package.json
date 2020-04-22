@@ -1,0 +1,49 @@
+{
+  "name": "cover-hooks",
+  "version": "1.0.0",
+  "description": "通用的react hooks",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack-dev-server --mode=development --config ./configs/webpack.config.js --open",
+    "build": "webpack --mode=production --config ./configs/webpack.config.js"
+  },
+  "keywords": [
+    "react",
+    "hooks",
+    "zhaodeezhu",
+    "cover"
+  ],
+  "author": "zhaodeezhu",
+  "license": "ISC",
+  "dependencies": {
+    "animate.css": "^3.7.2",
+    "babel-loader": "^8.1.0",
+    "font-awesome": "^4.7.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-react": "^7.9.4",
+    "@types/react": "^16.9.34",
+    "@types/react-dom": "^16.9.6",
+    "babel-loader": "^8.1.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "css-loader": "^3.5.2",
+    "file-loader": "^6.0.0",
+    "html-webpack-plugin": "^4.2.0",
+    "less": "^3.11.1",
+    "less-loader": "^5.0.0",
+    "style-loader": "^1.1.4",
+    "ts-loader": "^7.0.0",
+    "typescript": "^3.8.3",
+    "url-loader": "^4.1.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3",
+    "webpack-merge": "^4.2.2"
+  }
+}
