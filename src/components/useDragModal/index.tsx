@@ -1,14 +1,23 @@
-import React, {useState, memo, useCallback, useEffect, useMemo, useRef} from 'react';
-import animateGroup from './animateGroup'
+import React, {useState, memo, useCallback, useEffect, useMemo, useRef, useLayoutEffect} from 'react';
+import animateGroup, {Animate} from './animateGroup';
+import useLoading from '../../tools/useLoading';
 
+import Button from 'antd/es/button';
+import 'antd/es/button/style/index.css';
+
+import 'animate.css'
 import './index.less';
 import 'font-awesome/css/font-awesome.css';
+
+
+// declare function clearTimeout(timeoutId: any): void;
+// declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): any;
 
 interface IUseDragModalProps {
   /** 显示的默认值 */
   visible?: boolean;
   /** 动画 */
-  animate?: 'fade' | 'zoom' | 'rotate' | 'bounce' | 'bounceUp',
+  animate?: Animate,
   /** 是否组要遮挡层 */
   isMask?: boolean;
   /** 高度 */
@@ -21,6 +30,14 @@ interface IUseDragModalProps {
   footer?: string | React.ReactElement;
   /** 定时关闭 */
   closeTime?: number;
+  /** 默认位置 */
+  defaultPosition?: 'left' | 'right' | 'center';
+  /** 是否可拖拽 */
+  draggable?: boolean;
+  /** 点击蒙版可关闭 */
+  supperClose?: boolean;
+  /** 点击确认按钮 */
+  onOk?: () => void
 }
 
 interface IUseDragModalReturn {
@@ -36,16 +53,24 @@ interface IUseDragModalReturn {
   close: () => void;
   /** 恢复初始位置 */
   recoverPosition: () => void;
+  /** 异步时让确认按钮处于加载状态 */
+  loadingFunc: (func:()=>any) => any;
 }
 
-const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
-  props = {
-    animate: 'fade',
-    visible: false,
-    isMask: true,
-    width: 500,
-    ...props
-  }
+const useDragModal = (props:IUseDragModalProps = {
+  animate: 'fade',
+  visible: false,
+  isMask: true,
+  width: 500,
+  defaultPosition: 'center',
+  draggable: true,
+  supperClose: false
+}):IUseDragModalReturn => {
+  /** 记录自动关闭的定时器 */
+  const closeTimeout = useRef<number>()
+  /** 获取dom的高度 */
+  const modalDom = useRef<HTMLDivElement>()
+
   /** 控制显示 */
   const [visible, setVisible] = useState(props.visible ? true : false);
   /** 控制显示的动画 */
@@ -58,6 +83,9 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
     x: 50,
     y: 50
   })
+
+  /** 异步加载数据 */
+  const {loadingFunc, loading} = useLoading();
 
   /** 记录起始位置 */
   const startPosition = {
@@ -161,12 +189,26 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
   /** 计算默认位置 */
   const setStartPosition = useCallback(() => {
     let width = props.width as number;
-    let windowSize = window.innerWidth;
-    let ratio = (windowSize - width) / 2 / windowSize * 100;
-    
+    let windowWidth = window.innerWidth;
+    let windowHeight = window.innerHeight;
+    let ratioX = (windowWidth - width) / 2 / windowWidth * 100;
+    let ratioY = 20;
+    let sim = 2;
+    switch(props.defaultPosition) {
+      case 'left': 
+        ratioX = sim
+        ratioY = sim
+        break;
+      case 'right':
+        ratioX = (windowWidth - (windowWidth * (sim / 100) + (props.width as number))) / windowWidth * 100;
+        ratioY = sim
+        break;
+      default: 
+    }
+
     setPosition({
-      x: ratio,
-      y: 20
+      x: ratioX,
+      y: ratioY
     })
   }, [])
 
@@ -183,9 +225,27 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
     }
   }, [props.title])
 
+  // 原始的footer
+  const OriginFooter = useMemo(():React.ReactElement => {
+    return (
+      <div className="cv-drag-modal-footer cv-drag-modal-orgin-footer">
+        <Button>取消</Button>
+        <Button
+          onClick={() => {props.onOk && props.onOk()}}
+          style={{marginLeft: 8}}
+          type="primary"
+          loading={loading}
+        >
+          确认
+        </Button>
+      </div>
+    )
+  }, [loading])
+
+  // 获取footer
   const getFooter = useMemo((): void | React.ReactElement => {
-    if(!props.title) {
-      return 
+    if(!props.footer) {
+      return <React.Fragment>{OriginFooter}</React.Fragment>
     } else {
       return (
         <div className="cv-drag-modal-footer">
@@ -194,47 +254,70 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
       )
     }
 
-  }, [props.footer])
+  }, [props.footer, loading])
+
+  /** 添加自动关闭定时器 */
+  const addCloseTimeout = ():void => {
+    if(props.closeTime && visible === true) {
+      closeTimeout.current = window.setTimeout(() => {
+        close()
+      }, props.closeTime)
+    }
+  }
+
+  /** 移除自动关闭定时器 */
+  const removeCloseTimeout = ():void => {
+    if(closeTimeout.current) {
+      clearTimeout(closeTimeout.current)
+    }
+  }
+
+  /** 鼠标划入Modal框 */
+  const handleModalMouseEnter = useCallback(() => {
+    removeCloseTimeout();
+  }, [visible])
+
+  /** 鼠标离开Modal框 */
+  const handleModalMouseLeave = useCallback(() => {
+    addCloseTimeout();
+  }, [visible])
 
   // 计算默认的位置
   useEffect(() => {
     setStartPosition()
   }, [])
 
-  /** 记录自动关闭的定时器 */
-  const closeTimeout = useRef<NodeJS.Timeout>()
   /** 设置定时关闭的时间 */
   useEffect(() => {
-    if(props.closeTime && visible === true) {
-      const id = setTimeout(() => {
-        close()
-      }, props.closeTime)
-      closeTimeout.current = id;
-    }
-    return () => {
-      if(closeTimeout.current) {
-        clearTimeout(closeTimeout.current)
-      }
-    }
+    addCloseTimeout()
+    return removeCloseTimeout;
   }, [visible])
 
   /** 定义Modal组件 */
-  const Modal:React.FC = memo(():React.ReactElement => {
+  const Modal:React.FC = memo((modal):React.ReactElement => {
     return (
       <React.Fragment>
         {getDisplayBlock && (
-          <div className={`cv-modal animated ${getMaskAnimateClassName}`} style={cvModalStyle}>
+          <div 
+            className={`cv-modal animated ${getMaskAnimateClassName}`} 
+            style={cvModalStyle}
+            onMouseEnter={handleModalMouseEnter}
+            onMouseLeave={handleModalMouseLeave}
+            ref={(dom) => {modalDom.current = dom as HTMLDivElement}}
+            onClick={() => {props.supperClose && props.isMask && close()}}
+          >
             <div 
               className={`cv-drag-modal animated ${getAnimateClassName}`}
-              draggable={true}
+              draggable={props.draggable}
               onDragStart={handleOndragStart}
               onDragEnd={handleOndragEnd}
               style={cvDragModalStyle}
+              onClick={(e) => {e.stopPropagation()}}
             >
               <span className="cv-drag-moda-close fa fa-close" onClick={close}></span>
               {getTitle}
-              <div className="cv-drag-modal-body">
-                我是主体
+              <div className="cv-drag-modal-body" style={cvDragModalFooterStyle}>
+                {modal.children}
               </div>
               {getFooter}
             </div>
@@ -258,9 +341,16 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
       display: `${getDisplayBlock ? 'block' : 'none'}`,
       top: `${position.y}%`,
       left: `${position.x}%`,
-      width: props.width
+      width: props.width,
+      boxShadow: `${!props.isMask ? '0 0 2px 1px #f0f0f0' : ''}`
     }
   }, [getDisplayBlock, position])
+
+  const cvDragModalFooterStyle: React.CSSProperties = useMemo(():React.CSSProperties => {
+    return {
+      marginBottom: props.footer ? 55 : 0
+    }
+  }, [props.footer])
 
   return {
     triggerVisible,
@@ -268,9 +358,9 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
     visible,
     open,
     close,
-    recoverPosition: setStartPosition
+    recoverPosition: setStartPosition,
+    loadingFunc
   }
 }
-
 
 export default useDragModal;

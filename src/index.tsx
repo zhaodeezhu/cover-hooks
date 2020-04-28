@@ -2,7 +2,7 @@ import  React from 'react';
 import ReactDOM from 'react-dom';
 import MyName from './components/MyName';
 import './index.css';
-import 'animate.css'
+// import 'animate.css'
 
 document.getElementById('root')
 

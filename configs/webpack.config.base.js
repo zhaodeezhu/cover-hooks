@@ -1,12 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: {
-    index: './src/index.tsx',
-  },
-  output: {
-    filename: '[name][hash:8].js'
-  },
   resolve: {
     extensions: ['.ts', '.js', '.tsx'],
   },
