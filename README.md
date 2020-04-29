@@ -12,7 +12,7 @@
 
 ### useDragModal 可拖拽位置modal框
 
-#### 解决痛点
+#### 解决问题
 
 - 实现任意位置拖放
 - 按钮自动加载loading
@@ -108,7 +108,7 @@ interface IUseDragModalReturn {
 
 ### useWindowSize 实时过去页面窗口的大小
 
-#### 解决痛点
+#### 解决问题
 
 - 每次要监听页面变化的时候都要绑定resize事件
 - 还要重新调用原生方法获取大小
@@ -139,7 +139,7 @@ interface IUseWindowSizeReturn {
 
 ### useLoading调用异步接口的loading状态
 
-#### 解决痛点
+#### 解决问题
 
 - 无需每次都要操作状态控制loading的值
 
