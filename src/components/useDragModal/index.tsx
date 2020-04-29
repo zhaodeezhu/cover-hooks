@@ -37,8 +37,18 @@ interface IUseDragModalProps {
   draggable?: boolean;
   /** 点击蒙版可关闭 */
   supperClose?: boolean;
+  /** 取消按钮的文字，默认为取消 */
+  cancelText?: string;
+  /** 确认按钮的文字, 默认为确认 */
+  okText?: string;
+  /** 是否显示取消按钮, ture */
+  isCancel?: boolean;
+  /** 是否显示确认按钮, ture*/
+  isOk?: boolean;
   /** 点击确认按钮 */
-  onOk?: () => void
+  onOk?: () => void;
+  /** 点击取消按钮 */
+  onCancel?: () => void;
 }
 
 interface IUseDragModalReturn {
@@ -65,7 +75,11 @@ const useDragModal = (props:IUseDragModalProps = {
   width: 500,
   defaultPosition: 'center',
   draggable: true,
-  supperClose: false
+  supperClose: false,
+  isCancel: true,
+  isOk: true,
+  cancelText: '取消',
+  okText: '确认'
 }):IUseDragModalReturn => {
   /** 记录自动关闭的定时器 */
   const closeTimeout = useRef<number>()
@@ -233,7 +247,7 @@ const useDragModal = (props:IUseDragModalProps = {
   const OriginFooter = useMemo(():React.ReactElement => {
     return (
       <div className="cv-drag-modal-footer cv-drag-modal-orgin-footer">
-        <Button>取消</Button>
+        <Button onClick={() => {props.onCancel && props.onCancel()}}>取消</Button>
         <Button
           onClick={() => {props.onOk && props.onOk()}}
           style={{marginLeft: 8}}
