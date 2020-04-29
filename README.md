@@ -164,7 +164,6 @@ const ButtonLoading = () => {
     let res = await loadingFunc(getData)
   }
   
-  const {loading, }
   return (
   	<div>
     	<Button loading={loading} onClick={handleClick}></Button>
