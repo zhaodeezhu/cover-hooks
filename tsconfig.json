@@ -6,12 +6,12 @@
     "paths": {
       "@/*": ["./src/*"]
     },
-    "outDir": "build/dist",
-    "module": "esnext",
-    "target": "es5",
+    "outDir": "lib",
+    "module": "es6",
+    "target": "es6",
     "lib": ["ES2015", "DOM"],
-    "sourceMap": true,
-    "allowJs": true,
+    "sourceMap": false,
+    // "allowJs": true,
     "jsx": "react",
     "moduleResolution": "node",
     "rootDir": "src",
@@ -28,6 +28,7 @@
     "./node_modules/@types",
     "./@types"
   ],
+  "files": ["./src/index.ts", "./src/components/useDragModal/index.less"],
   "exclude": [
     "node_modules",
     "build",

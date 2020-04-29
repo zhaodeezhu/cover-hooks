@@ -1,6 +1,7 @@
 import React, {useState, memo, useCallback, useEffect, useMemo, useRef, useLayoutEffect} from 'react';
 import animateGroup, {Animate} from './animateGroup';
 import useLoading from '../../tools/useLoading';
+import useWindowSize from '../../tools/useWindowSize'
 
 import Button from 'antd/es/button';
 import 'antd/es/button/style/index.css';
@@ -86,6 +87,9 @@ const useDragModal = (props:IUseDragModalProps = {
 
   /** 异步加载数据 */
   const {loadingFunc, loading} = useLoading();
+
+  /** 获取变化后的窗口大小 */
+  const windowSize = useWindowSize();
 
   /** 记录起始位置 */
   const startPosition = {
@@ -292,6 +296,13 @@ const useDragModal = (props:IUseDragModalProps = {
     addCloseTimeout()
     return removeCloseTimeout;
   }, [visible])
+
+  /** 窗口大小变化 */
+  useEffect(() => {
+    if(!props.draggable) {
+      setStartPosition()
+    }
+  }, [windowSize])
 
   /** 定义Modal组件 */
   const Modal:React.FC = memo((modal):React.ReactElement => {

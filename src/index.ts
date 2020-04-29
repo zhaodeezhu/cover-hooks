@@ -1,8 +1,6 @@
-import {useDragModal} from './components';
-import {useLoading, useWindowSize} from './tools'
+import component from './components';
+import tools from './tools'
 
-export default {
-  useDragModal,
-  useLoading,
-  useWindowSize
-}
+export const useDragModal = component.useDragModal;
+export const useLoading = tools.useLoading;
+export const useWindowSize = tools.useWindowSize;

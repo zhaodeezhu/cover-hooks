@@ -1,2 +1,5 @@
 import useDragModalComponent from './useDragModal';
-export const useDragModal = useDragModalComponent;
+export default {
+  useDragModal: useDragModalComponent
+}
+// export const useDragModal = useDragModalComponent;
