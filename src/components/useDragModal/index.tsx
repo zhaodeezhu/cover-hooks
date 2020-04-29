@@ -8,7 +8,7 @@ import 'antd/es/button/style/index.css';
 
 import 'animate.css'
 import './index.less';
-import 'font-awesome/css/font-awesome.css';
+// import 'font-awesome/css/font-awesome.css';
 
 
 // declare function clearTimeout(timeoutId: any): void;
@@ -345,7 +345,7 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
               style={cvDragModalStyle}
               onClick={(e) => {e.stopPropagation()}}
             >
-              <span className="cv-drag-moda-close fa fa-close" onClick={close}></span>
+              <span className="cv-drag-moda-close" onClick={close}>×</span>
               {getTitle}
               <div className="cv-drag-modal-body" style={cvDragModalFooterStyle}>
                 {modal.children}
