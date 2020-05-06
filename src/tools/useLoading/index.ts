@@ -1,12 +1,7 @@
 import {useEffect, useState, useCallback} from 'react';
 
-/** 属性 */
-interface IProps {
-  ():void
-}
-
 /** 返回值 */
-interface IUseLoadingReturn {
+export interface IUseLoadingReturn {
   loadingFunc: (func: ()=>any)=>any;
   loading: boolean;
 }

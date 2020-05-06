@@ -181,3 +181,65 @@ interface IUseLoadingReturn {
 }
 ```
 
+### useWait 等待过程控制
+
+#### 解决问题
+
+- 状态由一种情况过度到另一种情况，又可以变变化回来
+- 适用于css动画切换过度
+
+### 使用
+
+```tsx
+import React from 'react';
+import useWait from '../tools/useWait/index';
+
+const Test = () => {
+  const {wait, toggleWait} = useWait({});
+  return (
+  	<div>
+    	{
+         wait !== 'E' && 
+         (
+          <div 
+            className={`animated ${wait === 'ES' ? 'bounceIn' : (wait === 'SE' ? 'bounceOut' : '')}`}
+            style={{
+               width: 100,
+               height: 100,
+               background: 'red'
+            }} />
+        )
+      }
+    </div>	
+  )
+}
+```
+
+#### props
+
+```typescript
+export interface IWaitProps {
+  /** 状态默认值 */
+  defaultValue?: 'S' | 'E',
+  /** 执行时长 */
+  time?: number;
+}
+```
+
+#### hooks
+
+```typescript
+type waitType = 'S' | 'E' | 'SE' | 'ES'
+
+export interface IWaitReturn {
+  /** 状态 */
+  wait: waitType,
+  /** 切换 */
+  toggleWait: () => void;
+  /** 开始到结束 */
+  startToEnd: () => void;
+  /** 结束到开始 */
+  endToStart: () => void;
+}
+```
+

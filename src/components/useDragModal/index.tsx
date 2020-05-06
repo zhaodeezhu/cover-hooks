@@ -14,7 +14,7 @@ import './index.less';
 // declare function clearTimeout(timeoutId: any): void;
 // declare function setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): any;
 
-interface IUseDragModalProps {
+export interface IUseDragModalProps {
   /** 显示的默认值 */
   visible?: boolean;
   /** 动画 */
@@ -28,7 +28,7 @@ interface IUseDragModalProps {
   /** 标题 */
   title?: string | React.ReactElement;
   /** 底部 */
-  footer?: string | React.ReactElement;
+  footer?: string | React.ReactElement | boolean;
   /** 定时关闭 */
   closeTime?: number;
   /** 默认位置 */
@@ -51,7 +51,7 @@ interface IUseDragModalProps {
   onCancel?: () => void;
 }
 
-interface IUseDragModalReturn {
+export interface IUseDragModalReturn {
   /** Modal框组件 */
   Modal: React.FC;
   /** 切换显示 */
@@ -268,7 +268,9 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
 
   // 获取footer
   const getFooter = useMemo((): void | React.ReactElement => {
-    if(!props.footer) {
+    if(props.footer === false) {
+      return 
+    } else if (!props.footer) {
       return <React.Fragment>{OriginFooter}</React.Fragment>
     } else {
       return (
@@ -376,10 +378,11 @@ const useDragModal = (props:IUseDragModalProps):IUseDragModalReturn => {
       boxShadow: `${!props.isMask ? '0 0 2px 1px #f0f0f0' : ''}`
     }
   }, [getDisplayBlock, position])
-
+  
+  /** Modal框footer样式 */
   const cvDragModalFooterStyle: React.CSSProperties = useMemo(():React.CSSProperties => {
     return {
-      marginBottom: props.footer ? 55 : 0
+      marginBottom: props.footer || props.footer === undefined ? 55 : 0
     }
   }, [props.footer])
 

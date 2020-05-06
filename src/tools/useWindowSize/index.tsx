@@ -1,6 +1,6 @@
 import React, {useState, memo, useCallback, useEffect} from 'react';
 
-interface IUseWindowSizeReturn {
+export interface IUseWindowSizeReturn {
   width: number;
   height: number;
 }
