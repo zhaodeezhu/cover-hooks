@@ -1,5 +1,6 @@
-import React, {useState, memo, useCallback, useEffect, useMemo, useRef, useLayoutEffect} from 'react';
+import React, {useState, memo, useCallback, useEffect, useMemo, useRef, useLayoutEffect, Component} from 'react';
 import Table from 'antd/es/table';
+import ResizeableTitle from './ResizeableTitle'
 import {TableProps} from 'antd/es/table/Table.d'
 import 'antd/es/radio/style/index.css'
 import 'antd/es/table/style/index.css';
@@ -38,6 +39,8 @@ export interface ICoverTable {
   dataSource: any[],
   /** 列配置 */
   columns: any[],
+  /** 改变列 */
+  handleResize?: (columns: any[], column?: any) => void
   /** 自定义行的类名 */
   rowClassName?: (record, index) => string;
   /** 选择后的触发的事件，使用此参数则出现选择框 */
@@ -50,7 +53,7 @@ export interface ICoverTable {
   pagePosition?: ('topLeft' | 'topCenter' | 'topRight' |'bottomLeft' | 'bottomCenter' | 'bottomRight')[]
 }
 
-const CoverTable:React.FC<ICoverTable> = memo((props):React.ReactElement => {
+const CoverTables:React.FC<ICoverTable> = memo((props):React.ReactElement => {
 
   /** 选择配置 */
   const rowSelection = useMemo(() => {
@@ -75,11 +78,37 @@ const CoverTable:React.FC<ICoverTable> = memo((props):React.ReactElement => {
     }
   }, [])
 
+  /** 设置可调整宽度头 */
+  const components = {
+    header: {
+      cell: ResizeableTitle,
+    },
+  };
+
+  /** 宽度变化 */
+  const handleResize = index => (e, { size }) => {
+    const nextColumns = [...props.columns];
+    nextColumns[index] = {
+      ...nextColumns[index],
+      width: size.width,
+    };
+    props.handleResize && props.handleResize(nextColumns)
+  };
+
+  const columns = props.columns.map((col, index) => ({
+    ...col,
+    onHeaderCell: column => ({
+      width: column.width,
+      onResize: handleResize(index),
+    }),
+  }));
+
   return (
     <div className="cover-table">
       <Table 
         bordered={true}
-        columns={props.columns}
+        columns={columns}
+        components={components}
         dataSource={props.dataSource}
         rowClassName={(record, index) => `cover-row ${props.rowClassName && props.rowClassName(record, index)}`}
         pagination={pagination}
@@ -90,9 +119,91 @@ const CoverTable:React.FC<ICoverTable> = memo((props):React.ReactElement => {
   )
 })
 
-CoverTable.defaultProps = {
-  selectType: 'checkbox',
-  rowSelection: {}
+class CoverTable extends Component<ICoverTable, {}> {
+  /** 属性默认值 */
+  static defaultProps = {
+    selectType: 'checkbox',
+    rowSelection: {}
+  }
+
+  /** 自定义单元格 */
+  private components = {
+    header: {
+      cell: ResizeableTitle,
+    },
+  };
+
+  /** 选择配置 */
+  private get rowSelection() {
+    let {onSelect, selectType, rowSelection} = this.props;
+    if(!onSelect || selectType === 'none') {
+      return {}
+    }
+    return {
+      rowSelection: {
+        type: selectType,
+        columnWidth: 40,
+        onChange: (selectedRowKeys, selectedRows) => {
+          onSelect && onSelect(selectedRows, selectedRowKeys)
+        },
+        ...rowSelection
+      }
+    }
+  }
+
+  /** 分页设置 */
+  private get pagination() {
+    const {pagePosition} = this.props
+    return {
+      position: pagePosition
+    }
+  }
+
+  /** 二次处理列 */
+  private get columns() {
+    return this.props.columns.map((col, index) => ({
+      ...col,
+      ellipsis: true,
+      onHeaderCell: column => ({
+        width: column.width,
+        onResize: this.handleResize(index),
+      }),
+    }));
+  }
+
+  /** 调整列宽 */
+  private handleResize = index => (e, { size }) => {
+    const {columns,handleResize} = this.props
+    const nextColumns = [...columns];
+    nextColumns[index] = {
+      ...nextColumns[index],
+      width: size.width,
+    };
+    handleResize && handleResize(nextColumns, nextColumns[index])
+  };
+
+  render() {
+    return (
+      <div className="cover-table">
+        <Table 
+          bordered={true}
+          columns={this.columns}
+          components={this.components}
+          dataSource={this.props.dataSource}
+          rowClassName={(record, index) => `cover-row ${this.props.rowClassName && this.props.rowClassName(record, index)}`}
+          pagination={this.pagination}
+          size="small"
+          scroll={{x: 2400, y: 400}}
+          {...this.rowSelection}
+        />
+      </div>
+    )
+  }
 }
+
+// CoverTable.defaultProps = {
+//   selectType: 'checkbox',
+//   rowSelection: {}
+// }
 
 export default CoverTable;
